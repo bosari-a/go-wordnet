@@ -13,7 +13,6 @@ import (
 )
 
 // the category/type of words defined in array "pos"
-var pos [4]string = [4]string{"adv", "adj", "noun", "verb"}
 
 type Word struct {
 	Word        string
@@ -21,9 +20,16 @@ type Word struct {
 	offsets     map[string][]uint64
 }
 
+var posExt = map[string]string{
+	"n": "noun",
+	"v": "verb",
+	"r": "adv",
+	"a": "adj",
+}
+
 func (word *Word) FindOffsets(w string, dictPath string) error {
 	word.offsets = make(map[string][]uint64)
-	for _, ext := range pos {
+	for pos, ext := range posExt {
 		file := fmt.Sprintf("index.%v", ext)
 		filepath := path.Join(dictPath, file)
 		data, err := os.ReadFile(filepath)
@@ -38,11 +44,6 @@ func (word *Word) FindOffsets(w string, dictPath string) error {
 		})
 		if i != -1 {
 			line := lines[i]
-			// regexp to match corresponding pos
-			posRegexp := regexp.MustCompile(`\s[a-z]{1}?\s`)
-			// corresponding pos is:
-			corrPos := string(posRegexp.Find([]byte(line)))
-			println(corrPos)
 			// regexp to match buffer offsets to definitions in data file
 			offsetRegexp := regexp.MustCompile(`\d{8}?`)
 			offsetsBytes := offsetRegexp.FindAll([]byte(line), -1)
@@ -50,7 +51,7 @@ func (word *Word) FindOffsets(w string, dictPath string) error {
 			for k, v := range offsetsBytes {
 				offsets[k] = binary.BigEndian.Uint64(v)
 			}
-			word.offsets[corrPos] = offsets
+			word.offsets[pos] = offsets
 			word.Word = w
 
 		}
@@ -71,7 +72,7 @@ func dataToContent(d []byte) []string {
 
 func main() {
 	var word Word
-	err := word.FindOffsets("act", "./dict")
+	err := word.FindOffsets("pleasantly", "./dict")
 	if err != nil {
 		panic(err)
 	}
