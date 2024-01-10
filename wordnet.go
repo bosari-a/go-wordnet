@@ -60,7 +60,7 @@ func (word *Word) GetDefinitions(w string, dictPath string) error {
 				}
 				key := fmt.Sprintf("%v(%v)", ext, k+1)
 				datafile := fmt.Sprintf("data.%v", ext)
-				def, err := ParseDefFile(path.Join(dictPath, datafile), offset)
+				def, err := ParseDataFile(path.Join(dictPath, datafile), offset)
 				if err != nil {
 					return err
 				}
@@ -75,7 +75,7 @@ func (word *Word) GetDefinitions(w string, dictPath string) error {
 // This function parses definition files (data.pos files).
 // It takes path to data.pos and the offset to the definition.
 // Returns the definition,nil or [empty string],err.
-func ParseDefFile(dataPath string, offset int) (string, error) {
+func ParseDataFile(dataPath string, offset int) (string, error) {
 	// open data.pos file and read the definition for current offset
 	// add definition to word.Definition
 	fd, err := os.Open(dataPath)
