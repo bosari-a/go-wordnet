@@ -89,6 +89,7 @@ func ParseDefFile(dataPath string, offset int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	fd.Close()
 	def := strings.Split(string(defLine), "|")[1]
 	return strings.TrimSpace(def), nil
 }
