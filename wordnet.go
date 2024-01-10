@@ -18,7 +18,7 @@ import (
 // corresponding pos (where pos is noun, adjective, adverb, verb).
 type Word struct {
 	Word        string
-	Definitions map[string]string
+	Definitions []string
 }
 
 // The category/type of words mapped to the file extension
@@ -34,7 +34,7 @@ var posExt = map[string]string{
 // It mutates a word struct by adding definitions to the Definitions hash map.
 // Returns error (nil if no error occurs).
 func (word *Word) GetDefinitions(dictPath string) error {
-	word.Definitions = make(map[string]string)
+	word.Definitions = []string{}
 	w := word.Word
 	for _, ext := range posExt {
 		file := fmt.Sprintf("index.%v", ext)
@@ -59,13 +59,13 @@ func (word *Word) GetDefinitions(dictPath string) error {
 				if err != nil {
 					return err
 				}
-				key := fmt.Sprintf("%v(%v)", ext, k+1)
 				datafile := fmt.Sprintf("data.%v", ext)
 				def, err := ParseDataFile(path.Join(dictPath, datafile), offset)
 				if err != nil {
 					return err
 				}
-				word.Definitions[key] = def
+				formattedDef := fmt.Sprintf("%v(%v) - %v", ext, k+1, def)
+				word.Definitions = append(word.Definitions, formattedDef)
 			}
 		}
 	}
