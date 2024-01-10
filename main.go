@@ -1,25 +1,28 @@
 package main
 
 import (
-	"encoding/binary"
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/bosari-a/array-utils/search"
 )
 
-// the category/type of words defined in array "pos"
-
+// Word struct for what a word should contain.
+// Offsets are stored for the purpose of finding definitions in data.pos files
 type Word struct {
 	Word        string
 	Definitions map[string]string
-	offsets     map[string][]uint64
+	offsets     map[string][]int
 }
 
+// the category/type of words defined in array "pos"
 var posExt = map[string]string{
 	"n": "noun",
 	"v": "verb",
@@ -28,7 +31,7 @@ var posExt = map[string]string{
 }
 
 func (word *Word) FindOffsets(w string, dictPath string) error {
-	word.offsets = make(map[string][]uint64)
+	word.offsets = make(map[string][]int)
 	for pos, ext := range posExt {
 		file := fmt.Sprintf("index.%v", ext)
 		filepath := path.Join(dictPath, file)
@@ -47,13 +50,12 @@ func (word *Word) FindOffsets(w string, dictPath string) error {
 			// regexp to match buffer offsets to definitions in data file
 			offsetRegexp := regexp.MustCompile(`\d{8}?`)
 			offsetsBytes := offsetRegexp.FindAll([]byte(line), -1)
-			offsets := make([]uint64, len(offsetsBytes))
+			offsets := make([]int, len(offsetsBytes))
 			for k, v := range offsetsBytes {
-				offsets[k] = binary.BigEndian.Uint64(v)
+				offsets[k], _ = strconv.Atoi(string(v))
 			}
 			word.offsets[pos] = offsets
 			word.Word = w
-
 		}
 	}
 	return nil
