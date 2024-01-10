@@ -33,8 +33,9 @@ var posExt = map[string]string{
 // This function takes the word to be searched and the path to the wordnet dict folder.
 // It mutates a word struct by adding definitions to the Definitions hash map.
 // Returns error (nil if no error occurs).
-func (word *Word) GetDefinitions(w string, dictPath string) error {
+func (word *Word) GetDefinitions(dictPath string) error {
 	word.Definitions = make(map[string]string)
+	w := word.Word
 	for _, ext := range posExt {
 		file := fmt.Sprintf("index.%v", ext)
 		filepath := path.Join(dictPath, file)
@@ -66,7 +67,6 @@ func (word *Word) GetDefinitions(w string, dictPath string) error {
 				}
 				word.Definitions[key] = def
 			}
-			word.Word = w
 		}
 	}
 	return nil
